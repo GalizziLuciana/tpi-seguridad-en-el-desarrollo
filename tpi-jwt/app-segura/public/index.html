@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MiniBank</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🏦 MiniBank</div>
+    <div id="userbox" class="userbox hidden">
+      <span id="userLabel"></span>
+      <button id="logoutBtn">Salir</button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Login -->
+    <section id="loginView" class="card">
+      <h1>Ingresar</h1>
+      <form id="loginForm">
+        <label>Usuario <input id="usuario" value="juan" autocomplete="username"></label>
+        <label>Clave <input id="clave" type="password" value="juan1234" autocomplete="current-password"></label>
+        <button type="submit">Ingresar</button>
+      </form>
+      <p id="loginError" class="error"></p>
+      <p class="hint">Prueba: <code>juan / juan1234</code></p>
+    </section>
+
+    <!-- Cuenta del cliente -->
+    <section id="cuentaView" class="card hidden">
+      <h1>Mi cuenta</h1>
+      <p class="titular">Titular: <strong id="titular"></strong></p>
+      <p class="titular">N° de cuenta: <strong id="nroCuenta"></strong></p>
+      <p class="balance">Saldo disponible: <strong id="balance"></strong></p>
+
+      <h2>Movimientos</h2>
+      <table class="mov">
+        <thead><tr><th>Fecha</th><th>Detalle</th><th>Monto</th></tr></thead>
+        <tbody id="movBody"></tbody>
+      </table>
+
+      <h2>Transferir dinero</h2>
+      <form id="transferForm" class="transfer">
+        <label>Cuenta destino <input id="destino" placeholder="Ej: 1002"></label>
+        <label>Monto <input id="monto" type="number" placeholder="Ej: 5000"></label>
+        <button type="submit">Transferir</button>
+      </form>
+      <p id="transferMsg" class="msg"></p>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

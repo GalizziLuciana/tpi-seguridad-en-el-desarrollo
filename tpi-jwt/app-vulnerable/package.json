@@ -1,0 +1,15 @@
+{
+  "name": "minibank-vulnerable",
+  "version": "1.0.0",
+  "description": "MiniBank - version con fallas de autenticacion JWT (TPI Seguridad en el Desarrollo de Software)",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node db.js --seed"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "express": "^4.21.2"
+  }
+}

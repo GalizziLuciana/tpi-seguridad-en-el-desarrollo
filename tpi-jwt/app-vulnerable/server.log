@@ -1,0 +1,7 @@
+[db] Datos de ejemplo cargados (juan #1001, maria #1002).
+
+  MiniBank (VULNERABLE) escuchando en http://localhost:3000
+  Clientes de prueba:
+    juan  / juan1234   (cuenta #1001, saldo $15.000)
+    maria / maria1234  (cuenta #1002, saldo $982.000)
+
