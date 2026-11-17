@@ -46,6 +46,16 @@ function sign(payload) {
   return `${data}.${b64url(signature)}`;
 }
 
+// Emision legacy (HS256 con el secreto debil heredado), util para demostrar en vivo
+// como se generaban los tokens antes de la migracion a RS256.
+function signLegacy(payload) {
+  const header = { alg: 'HS256', typ: 'JWT' };
+  const body = { ...payload, iat: Math.floor(Date.now() / 1000) };
+  const data = `${b64urlJson(header)}.${b64urlJson(body)}`;
+  const signature = crypto.createHmac('sha256', cfg.LEGACY_HS_SECRET).update(data).digest();
+  return `${data}.${b64url(signature)}`;
+}
+
 // ----------------------------------------------------------------------------
 // VERIFICACION VULNERABLE
 // ----------------------------------------------------------------------------
@@ -66,8 +76,8 @@ function verify(token) {
   // >>> AQUI ESTA LA FALLA: confiar en header.alg <<<
   const alg = header.alg;
 
-  // (A) VULNERABILIDAD: algoritmo "none" aceptado sin firma.
-  if (alg === 'none' || alg === 'None' || alg === 'NONE') {
+  // (A) VULNERABILIDAD: algoritmo "none" aceptado sin firma (cualquier capitalizacion).
+  if (typeof alg === 'string' && alg.toLowerCase() === 'none') {
     return payload;
   }
 
@@ -105,4 +115,4 @@ function verify(token) {
   throw new Error(`Algoritmo no soportado: ${alg}`);
 }
 
-module.exports = { sign, verify, b64url, b64urlJson };
+module.exports = { sign, signLegacy, verify, b64url, b64urlJson };

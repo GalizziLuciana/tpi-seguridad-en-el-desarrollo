@@ -1,0 +1,16 @@
+services:
+  app-vulnerable:
+    build: ./app-vulnerable
+    container_name: minibank-vulnerable
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+
+  app-segura:
+    build: ./app-segura
+    container_name: minibank-segura
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001

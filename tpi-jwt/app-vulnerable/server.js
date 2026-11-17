@@ -47,13 +47,17 @@ function auth(req, res, next) {
 
 // ---- login ----
 app.post('/api/login', (req, res) => {
-  const { usuario, clave } = req.body || {};
+  const { usuario, clave, legacy } = req.body || {};
   const u = store.getUserByUsername(usuario);
   if (!u || !store.verifyPassword(clave, u.password)) {
     return res.status(401).json({ error: 'Usuario o clave incorrectos' });
   }
   // El token NO lleva exp en la version vulnerable (otro detalle a mejorar).
-  const token = jwt.sign({ sub: u.id, usuario: u.username });
+  // Si se solicita { legacy: true } (o ?legacy=1), emite un token HS256 con el secreto heredado.
+  const usarLegacy = Boolean(legacy || req.query.legacy);
+  const token = usarLegacy
+    ? jwt.signLegacy({ sub: u.id, usuario: u.username })
+    : jwt.sign({ sub: u.id, usuario: u.username });
   res.json({ token });
 });
 

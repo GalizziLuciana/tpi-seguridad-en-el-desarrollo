@@ -14,7 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const KEYS_DIR = path.join(__dirname, 'keys');
+const KEYS_DIR = process.env.KEYS_DIR || path.join(__dirname, 'keys');
 const PRIV_PATH = path.join(KEYS_DIR, 'private.pem');
 const PUB_PATH = path.join(KEYS_DIR, 'public.pem');
 

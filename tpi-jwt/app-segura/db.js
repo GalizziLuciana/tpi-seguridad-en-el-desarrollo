@@ -13,7 +13,7 @@ const path = require('path');
 const crypto = require('crypto');
 const Database = require('better-sqlite3');
 
-const db = new Database(path.join(__dirname, 'minibank.db'));
+const db = new Database(process.env.DB_PATH || path.join(__dirname, 'minibank.db'));
 db.pragma('journal_mode = WAL');
 
 function hashPassword(plain) {
@@ -51,7 +51,10 @@ function init() {
   `);
 }
 
-function seed() {
+function seed(forceReset = false) {
+  if (forceReset) {
+    db.exec('DELETE FROM movimientos; DELETE FROM users;');
+  }
   const count = db.prepare('SELECT COUNT(*) AS n FROM users').get().n;
   if (count > 0) return;
 
@@ -77,7 +80,8 @@ function seed() {
 }
 
 init();
-seed();
+const forceSeed = require.main === module && (process.argv.includes('--seed') || process.argv.includes('--reset'));
+seed(forceSeed);
 
 // Transferencia: debita de la cuenta ORIGEN e impacta en la cuenta DESTINO.
 // Devuelve el nuevo saldo de la cuenta origen. Lanza Error si algo no valida.
