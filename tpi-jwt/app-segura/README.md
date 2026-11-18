@@ -31,6 +31,17 @@ npm start     # http://localhost:3001
    agrega a una lista de invalidación. Responde a *"¿cómo se revoca una sesión
    comprometida?"*. En producción, esa lista iría en Redis o base de datos.
 
+6. **Validación de propósito (`iss` y `aud`).** El servidor incluye y exige los
+   claims `iss: 'minibank'` y `aud: 'minibank-clientes'`, evitando que un token
+   emitido para otro servicio o propósito sea reutilizado.
+
+7. **Transporte en Cookie `HttpOnly` + `SameSite=Strict`.** En `POST /api/login`
+   el servidor envía el JWT en una cookie `HttpOnly` (inaccesible desde
+   JavaScript / `localStorage`, mitigando el robo de sesión por XSS) y el
+   frontend web opera directamente con esa cookie sin almacenar el token en
+   `localStorage` (manteniendo compatibilidad con `Authorization: Bearer` para
+   clientes de API y scripts de prueba).
+
 ## Defensas a nivel de infraestructura (documentadas)
 
 - **Rotación de claves con JWK**: el endpoint `/.well-known/jwks.json` publica la
@@ -43,8 +54,9 @@ npm start     # http://localhost:3001
 Con la app corriendo, correr los exploits apuntando a este puerto:
 ```bash
 cd ../exploits
-BASE=http://localhost:3001 node 01-alg-none.js
-BASE=http://localhost:3001 node 02-secreto-debil.js
-BASE=http://localhost:3001 node 03-confusion-rs256-hs256.js
+node 01-alg-none.js --segura
+node 02-secreto-debil.js --segura
+node 03-confusion-rs256-hs256.js --segura
 ```
+(También funciona pasando la variable de entorno `BASE=http://localhost:3001`).
 Los tres deben terminar en **HTTP 401** (el ataque ya no funciona).

@@ -248,11 +248,12 @@ La versión `app-segura` corrige las fallas con defensas en capas.
 3. **Secreto/clave fuerte y no hardcodeado** (variable de entorno / gestor de secretos).
    Se elimina el secreto HS256 heredado.
 4. **Expiración corta (`exp`)** y validación automática de la misma.
-5. **Revocación por `jti`**: cada token lleva un id único; `POST /api/logout` lo
-   invalida. Responde a la pregunta "¿cómo se revoca una sesión comprometida?".
+5. **Revocación por `jti`**: cada token lleva un id único; `POST /api/logout` (invocado también por el botón *Salir* de la interfaz) lo invalida. Responde a la pregunta "¿cómo se revoca una sesión comprometida?".
+6. **Validación de propósito (`iss` y `aud`)**: se fijan y verifican `issuer: 'minibank'` y `audience: 'minibank-clientes'`, cumpliendo el principio de un token/clave por propósito.
+7. **Cookie `HttpOnly` + `SameSite=Strict` (+ `Secure` en producción)**: en la versión segura el servidor entrega el token en una cookie `HttpOnly` y el frontend no lo almacena en `localStorage`, protegiéndolo ante eventuales ataques XSS.
 
 **A nivel de infraestructura:** rotación de claves con JWK (`kid` + `/.well-known/jwks.json`),
-TLS obligatorio y, si el token viajara en cookie, atributos `HttpOnly` + `Secure` + `SameSite`.
+TLS obligatorio, atributos de cookie seguros y despliegue reproducible con Docker (`docker compose up --build`).
 
 ### Verificación: mismos ataques contra la versión segura
 
@@ -267,7 +268,7 @@ TLS obligatorio y, si el token viajara en cookie, atributos `HttpOnly` + `Secure
 > es la defensa que corta de raíz los tres ataques.
 
 El flujo legítimo (login, consulta de cuenta y transferencia) sigue funcionando con
-normalidad, y además el token ahora incluye `exp` y `jti`.
+normalidad, y además el token ahora incluye `exp`, `jti`, `iss` y `aud`.
 
 ---
 
@@ -287,15 +288,18 @@ expiración, revocación y buenas prácticas de infraestructura.
 
 ```bash
 # App vulnerable (puerto 3000)
-cd app-vulnerable && npm install && npm start
+cd tpi-jwt/app-vulnerable && npm install && npm start
 
 # Exploits (otra terminal)
-cd exploits
+cd tpi-jwt/exploits
 node 01-alg-none.js
 node 02-secreto-debil.js
 node 03-confusion-rs256-hs256.js
 
 # App segura (puerto 3001) y re-ejecución (los 3 deben dar 401)
-cd app-segura && npm install && npm start
-cd ../exploits && BASE=http://localhost:3001 node 01-alg-none.js
+cd tpi-jwt/app-segura && npm install && npm start
+cd ../exploits && node 01-alg-none.js --segura
+
+# Opcional: levantar ambas apps con Docker
+cd tpi-jwt && docker compose up --build
 ```

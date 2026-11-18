@@ -15,7 +15,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const KEYS_DIR = path.join(__dirname, 'keys');
+const KEYS_DIR = process.env.KEYS_DIR || path.join(__dirname, 'keys');
 const PRIV_PATH = path.join(KEYS_DIR, 'private.pem');
 const PUB_PATH = path.join(KEYS_DIR, 'public.pem');
 
@@ -46,6 +46,14 @@ module.exports = {
 
   // Expiracion corta del token de acceso.
   ACCESS_TTL: '15m',
+  ACCESS_MAX_AGE_MS: 15 * 60 * 1000,
+
+  // Claims de proposito (issuer y audience) para evitar reutilizacion entre servicios.
+  ISSUER: 'minibank',
+  AUDIENCE: 'minibank-clientes',
+
+  // Nombre de la cookie de sesion (HttpOnly + SameSite=Strict).
+  COOKIE_NAME: 'minibank_token',
 
   RSA_KID: 'minibank-rsa-2024',
 };

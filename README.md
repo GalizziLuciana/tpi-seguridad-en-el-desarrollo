@@ -18,10 +18,10 @@ es un IDOR habilitado por fallas en la verificación del JWT.
 
 | Carpeta | Qué es |
 |---------|--------|
-| `app-vulnerable/` | MiniBank con 3 fallas de verificación de JWT. Puerto **3000**. |
-| `app-segura/`     | Mismo MiniBank con las defensas aplicadas. Puerto **3001**. |
-| `exploits/`       | 3 scripts que forjan tokens y suplantan a otra clienta. |
-| `docs/`           | Propuesta para Moodle (md + pdf) e informe técnico. |
+| `tpi-jwt/app-vulnerable/` | MiniBank con 3 fallas de verificación de JWT. Puerto **3000**. |
+| `tpi-jwt/app-segura/`     | Mismo MiniBank con las defensas aplicadas. Puerto **3001**. |
+| `tpi-jwt/exploits/`       | 3 scripts que forjan tokens y suplantan a otra clienta. |
+| `tpi-jwt/docs/`           | Propuesta para Moodle (md + pdf) e informe técnico. |
 
 ## Las 3 fallas (misma raíz)
 
@@ -35,18 +35,25 @@ algoritmo esperado. De ahí:
 ## Cómo correrlo
 
 ```bash
-# 1) App vulnerable
-cd app-vulnerable && npm install && npm start      # http://localhost:3000
+# 1) App vulnerable (puerto 3000)
+cd tpi-jwt/app-vulnerable && npm install && npm start
 
 # 2) Exploits (en otra terminal)
-cd exploits
+cd tpi-jwt/exploits
 node 01-alg-none.js
 node 02-secreto-debil.js
 node 03-confusion-rs256-hs256.js
 
-# 3) App segura y re-ejecución de los exploits (deben fallar con 401)
-cd app-segura && npm install && npm start          # http://localhost:3001
-cd ../exploits && BASE=http://localhost:3001 node 01-alg-none.js
+# 3) App segura (puerto 3001) y re-ejecución de los exploits (deben fallar con 401)
+cd tpi-jwt/app-segura && npm install && npm start
+cd ../exploits
+node 01-alg-none.js --segura
+node 02-secreto-debil.js --segura
+node 03-confusion-rs256-hs256.js --segura
+
+# Opcional: correr todo junto (con ambas apps levantadas) o usar Docker
+node verificar-todo.js
+cd .. && docker compose up --build
 ```
 
 Clientes de prueba: `juan / juan1234` (cuenta #1001) y `maria / maria1234`

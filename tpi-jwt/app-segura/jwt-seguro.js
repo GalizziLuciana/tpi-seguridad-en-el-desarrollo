@@ -27,15 +27,19 @@ function sign(payload) {
   return jwt.sign(payload, cfg.RSA_PRIVATE_KEY, {
     algorithm: cfg.ALG,          // firma SIEMPRE con RS256
     expiresIn: cfg.ACCESS_TTL,   // exp corto
+    issuer: cfg.ISSUER,          // emisor esperado (proposito)
+    audience: cfg.AUDIENCE,      // audiencia esperada (proposito)
     keyid: cfg.RSA_KID,
     jwtid: crypto.randomUUID(),  // jti unico, para poder revocar
   });
 }
 
 function verify(token) {
-  // La clave: fijar algorithms. Sin esto, se habilitarian none y HS256.
+  // La clave: fijar algorithms + validar issuer/audience (proposito del token).
   const payload = jwt.verify(token, cfg.RSA_PUBLIC_KEY, {
     algorithms: [cfg.ALG],
+    issuer: cfg.ISSUER,
+    audience: cfg.AUDIENCE,
   });
   if (payload.jti && revocados.has(payload.jti)) {
     throw new Error('Token revocado');

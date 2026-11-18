@@ -24,13 +24,25 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Extrae una cookie por nombre sin dependencias externas.
+function getCookie(req, name) {
+  const raw = req.headers['cookie'];
+  if (!raw) return null;
+  for (const part of raw.split(';')) {
+    const [k, ...v] = part.trim().split('=');
+    if (k === name) return decodeURIComponent(v.join('='));
+  }
+  return null;
+}
+
 function auth(req, res, next) {
   const header = req.headers['authorization'] || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : null;
-  if (!token) return res.status(401).json({ error: 'Falta el token (Authorization: Bearer ...)' });
+  const bearer = header.startsWith('Bearer ') ? header.slice(7) : null;
+  const token = bearer || getCookie(req, cfg.COOKIE_NAME);
+  if (!token) return res.status(401).json({ error: 'Falta el token (Authorization: Bearer o Cookie HttpOnly)' });
   try {
     req.token = token;
-    req.usuario = jwt.verify(token); // verificacion segura: algorithms fijado + exp + revocacion
+    req.usuario = jwt.verify(token); // verificacion segura: algorithms + iss/aud + exp + revocacion
     next();
   } catch (e) {
     return res.status(401).json({ error: 'Token invalido', detalle: e.message });
@@ -44,11 +56,23 @@ app.post('/api/login', (req, res) => {
     return res.status(401).json({ error: 'Usuario o clave incorrectos' });
   }
   const token = jwt.sign({ sub: u.id, usuario: u.username });
+  // Envia el token en cookie HttpOnly + SameSite=Strict (+ Secure en produccion/TLS)
+  res.cookie(cfg.COOKIE_NAME, token, {
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: cfg.ACCESS_MAX_AGE_MS,
+  });
   res.json({ token });
 });
 
 app.post('/api/logout', auth, (req, res) => {
   jwt.revocar(req.token); // invalida el jti aunque no haya expirado
+  res.clearCookie(cfg.COOKIE_NAME, {
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+  });
   res.json({ ok: true, mensaje: 'Sesion revocada' });
 });
 
