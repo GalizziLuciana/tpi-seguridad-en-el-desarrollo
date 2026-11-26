@@ -47,7 +47,7 @@ npm start     # http://localhost:3001
 - **Rotación de claves con JWK**: el endpoint `/.well-known/jwks.json` publica la
   clave pública con su `kid`, permitiendo rotar sin romper tokens vigentes.
 - **TLS obligatorio** (HTTPS) para proteger el token en tránsito.
-- Si el token viajara en cookie, usar `HttpOnly` + `Secure` + `SameSite`.
+- **Atributos de cookie seguros en producción**: `HttpOnly` + `SameSite=Strict` + `Secure` (habilitado automáticamente con `NODE_ENV=production` sobre HTTPS).
 
 ## Verificación
 

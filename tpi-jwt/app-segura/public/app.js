@@ -8,10 +8,6 @@ const fmt = (n) => '$' + n.toLocaleString('es-AR');
 
 async function api(path, opts = {}) {
   const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
-  // Si alguien inyecta a mano un token en localStorage desde DevTools para probar
-  // el ataque en el navegador, lo enviamos en Authorization para que el backend lo valide y rechace (401).
-  const manualToken = localStorage.getItem('minibank_token');
-  if (manualToken) headers['Authorization'] = 'Bearer ' + manualToken;
   const res = await fetch(path, Object.assign({ credentials: 'same-origin' }, opts, { headers }));
   const data = await res.json().catch(() => ({}));
   return { ok: res.ok, status: res.status, data };
@@ -41,14 +37,12 @@ async function logout(revocarEnServidor = true) {
   if (revocarEnServidor) {
     await api('/api/logout', { method: 'POST' }).catch(() => {});
   }
-  localStorage.removeItem('minibank_token');
   show('login');
 }
 
 $('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   $('loginError').textContent = '';
-  localStorage.removeItem('minibank_token');
   const r = await api('/api/login', {
     method: 'POST',
     body: JSON.stringify({ usuario: $('usuario').value, clave: $('clave').value }),

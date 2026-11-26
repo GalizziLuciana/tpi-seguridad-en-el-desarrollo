@@ -35,7 +35,7 @@ aplicando defensas en capas. Tras las correcciones, los tres ataques son rechaza
 MiniBank es una aplicación web (Node.js + Express + SQLite) donde un cliente inicia
 sesión, ve el saldo y los movimientos de **su** cuenta y puede **transferir dinero**.
 La sesión se mantiene con un JWT que el cliente envía en la cabecera
-`Authorization: Bearer <token>`. La identidad de la cuenta se resuelve a partir del
+`Authorization: Bearer <token>` (o mediante cookie `HttpOnly` en la versión segura). La identidad de la cuenta se resuelve a partir del
 claim `sub` del token.
 
 Usuarios de prueba:
