@@ -63,7 +63,7 @@ app.post('/api/login', (req, res) => {
     secure: process.env.NODE_ENV === 'production',
     maxAge: cfg.ACCESS_MAX_AGE_MS,
   });
-  res.json({ token });
+  res.json({ ok: true });
 });
 
 app.post('/api/logout', auth, (req, res) => {
